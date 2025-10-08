@@ -7,21 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Bangers&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&family=Lilita+One&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #1a202c;
-            color: #e2e8f0;
+            font-family: 'Nunito', sans-serif;
+            background-image: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
+            color: #4a5568;
         }
-        .font-bangers {
-            font-family: 'Bangers', cursive;
+        .font-lilita {
+            font-family: 'Lilita One', cursive;
         }
         .card {
-            background-color: #2d3748;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
             border-radius: 1.5rem;
-            border: 4px solid #4a5568;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 4px solid white;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
         .choice-card {
@@ -32,9 +33,9 @@
             min-height: 280px;
             padding: 1.5rem;
         }
-        .choice-card.correct { border-color: #68d391; background-color: #2f855a; }
-        .choice-card.incorrect { border-color: #fc8181; background-color: #c53030; }
-        .choice-card.drop-zone-active { border-color: #f6e05e; transform: scale(1.02); }
+        .choice-card.correct { border-color: #34d399; background-color: rgba(167, 243, 208, 0.9); }
+        .choice-card.incorrect { border-color: #fb7185; background-color: rgba(254, 205, 211, 0.9); }
+        .choice-card.drop-zone-active { border-color: #facc15; transform: scale(1.02); }
         .team-token-disc {
             width: 60px;
             height: 60px;
@@ -42,7 +43,7 @@
             cursor: grab;
             transition: all 0.2s ease;
             border: 4px solid white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .team-token-disc:active { cursor: grabbing; transform: scale(1.1); z-index: 50; }
         .team-token-disc.placed {
@@ -53,11 +54,12 @@
         .token-start-zone {
             min-height: 70px;
             width: 100%;
-            border: 2px dashed #4a5568;
+            border: 2px dashed #94a3b8;
             border-radius: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: rgba(255,255,255,0.2);
         }
         .btn {
             border-radius: 0.75rem;
@@ -65,35 +67,35 @@
             padding: 0.5rem 1rem;
             font-size: 0.875rem;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border: 2px solid transparent;
         }
-        .btn-primary { background-color: #4299e1; color: white; }
-        .btn-primary:hover { background-color: #3182ce; }
-        .btn-green { background-color: #48bb78; color: white; }
-        .btn-green:hover { background-color: #38a169; }
-        .btn-yellow { background-color: #f6e05e; color: #1a202c; }
-        .btn-yellow:hover { background-color: #f59e0b; }
+        .btn-primary { background-color: #ec4899; color: white; }
+        .btn-primary:hover { background-color: #d946ef; }
+        .btn-green { background-color: #22c55e; color: white; }
+        .btn-green:hover { background-color: #16a34a; }
+        .btn-yellow { background-color: #f59e0b; color: white; }
+        .btn-yellow:hover { background-color: #d97706; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-5xl mx-auto text-center relative">
-        <button id="fullscreen-btn" class="absolute top-2 right-2 z-50 p-2 rounded-full bg-gray-600 hover:bg-gray-500 text-white" title="Toggle Fullscreen">
+        <button id="fullscreen-btn" class="absolute top-2 right-2 z-50 p-2 rounded-full bg-white/30 hover:bg-white/50 text-slate-700" title="Toggle Fullscreen">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
             </svg>
         </button>
         <!-- Setup Section -->
         <div id="setup-section" class="card p-8 mb-8">
-            <h1 class="text-5xl font-bangers text-yellow-400 tracking-wider">Metric Match-up</h1>
-            <h2 class="text-xl mt-2 mb-6 text-gray-400">Team Showdown!</h2>
+            <h1 class="text-6xl font-lilita text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 tracking-wider">Metric Match-up</h1>
+            <h2 class="text-xl mt-2 mb-6 text-slate-500">Team Showdown!</h2>
             <h3 class="text-lg font-semibold mb-4">How many teams are playing?</h3>
             <div id="team-count-selector" class="flex justify-center space-x-4 mb-6">
-                <button data-count="2" class="btn bg-gray-600 hover:bg-gray-500 text-white w-16 h-16 text-3xl rounded-full">2</button>
-                <button data-count="3" class="btn bg-gray-600 hover:bg-gray-500 text-white w-16 h-16 text-3xl rounded-full">3</button>
-                <button data-count="4" class="btn bg-gray-600 hover:bg-gray-500 text-white w-16 h-16 text-3xl rounded-full">4</button>
+                <button data-count="2" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">2</button>
+                <button data-count="3" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">3</button>
+                <button data-count="4" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">4</button>
             </div>
             <div id="team-config-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"></div>
             <button id="start-game-btn" class="btn btn-primary text-xl hidden w-full md:w-auto">Start Game</button>
@@ -102,7 +104,7 @@
         <!-- Game Section -->
         <div id="game-section" class="hidden">
             <div class="flex justify-between items-center mb-4 px-2">
-                 <h1 class="text-4xl font-bangers text-yellow-400 tracking-wider" id="question-title">Which is MORE?</h1>
+                 <h1 class="text-5xl font-lilita text-white tracking-wider" id="question-title">Which is MORE?</h1>
                 <div>
                     <button id="reveal-btn" class="btn btn-yellow text-lg">Reveal Answer</button>
                     <button id="next-btn" class="btn btn-green text-lg hidden">Next Question</button>
@@ -114,7 +116,7 @@
                     <div class="flex-grow flex flex-col items-center justify-center">
                         <span class="text-8xl" id="emoji-left"></span>
                         <p class="text-2xl mt-4" id="desc-left"></p>
-                        <p class="text-4xl font-bangers text-blue-300 mt-2" id="value-left"></p>
+                        <p class="text-5xl font-lilita text-violet-600 mt-2" id="value-left"></p>
                     </div>
                     <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
@@ -122,7 +124,7 @@
                      <div class="flex-grow flex flex-col items-center justify-center">
                         <span class="text-8xl" id="emoji-right"></span>
                         <p class="text-2xl mt-4" id="desc-right"></p>
-                        <p class="text-4xl font-bangers text-blue-300 mt-2" id="value-right"></p>
+                        <p class="text-5xl font-lilita text-violet-600 mt-2" id="value-right"></p>
                     </div>
                     <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
@@ -131,7 +133,7 @@
             <div id="teams-control-area" class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <!-- Team controls are generated here -->
             </div>
-            <p id="feedback-text" class="text-2xl font-bold mt-4 h-8"></p>
+            <p id="feedback-text" class="text-2xl font-bold mt-4 h-8 text-white"></p>
         </div>
     </div>
 
@@ -170,14 +172,18 @@
         let draggedItem = null;
 
         // --- Setup Logic ---
-        const defaultColors = ['#f6ad55', '#4fd1c5', '#f687b3', '#68d391'];
+        const defaultColors = ['#f97316', '#10b981', '#ec4899', '#3b82f6'];
 
         teamCountSelector.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON') {
                 const count = parseInt(e.target.dataset.count);
                 createTeamConfigs(count);
-                document.querySelectorAll('#team-count-selector button').forEach(btn => btn.classList.remove('bg-blue-500'));
-                e.target.classList.add('bg-blue-500');
+                document.querySelectorAll('#team-count-selector button').forEach(btn => {
+                    btn.classList.remove('bg-violet-500', 'text-white');
+                    btn.classList.add('bg-slate-200', 'text-slate-700');
+                });
+                e.target.classList.add('bg-violet-500', 'text-white');
+                e.target.classList.remove('bg-slate-200', 'text-slate-700');
             }
         });
 
@@ -185,11 +191,11 @@
             teamConfigContainer.innerHTML = '';
             for (let i = 0; i < count; i++) {
                 const teamConfig = document.createElement('div');
-                teamConfig.className = 'flex flex-col items-center space-y-2 p-3 bg-gray-700 rounded-lg';
+                teamConfig.className = 'flex flex-col items-center space-y-2 p-3 bg-white/20 rounded-lg';
                 teamConfig.innerHTML = `
-                    <label for="team-name-${i}" class="font-semibold">Team ${i + 1}</label>
-                    <input type="text" id="team-name-${i}" class="w-full bg-gray-800 border border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Name" value="Team ${i+1}">
-                    <input type="color" id="team-color-${i}" value="${defaultColors[i]}" class="w-full h-10 rounded-md cursor-pointer bg-gray-800">
+                    <label for="team-name-${i}" class="font-semibold text-white">Team ${i + 1}</label>
+                    <input type="text" id="team-name-${i}" class="w-full bg-white/50 border border-slate-300 rounded-md p-2 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500" placeholder="Name" value="Team ${i+1}">
+                    <input type="color" id="team-color-${i}" value="${defaultColors[i]}" class="w-full h-10 rounded-md cursor-pointer bg-transparent border-0">
                 `;
                 teamConfigContainer.appendChild(teamConfig);
             }
@@ -236,7 +242,6 @@
                 }
             }
             
-            // Handle values smaller than the smallest prefix in the main list
             const smallestPrefix = formatPrefixes[formatPrefixes.length - 1];
             const displayVal = value / smallestPrefix.factor;
             const formattedVal = parseFloat(displayVal.toPrecision(3));
@@ -254,8 +259,8 @@
                          <div id="team-token-${team.id}" class="team-token-disc" draggable="true" style="background-color: ${team.color};"></div>
                     </div>
                     <div class="text-center">
-                        <p class="text-lg font-semibold" style="color: ${team.color};">${team.name}</p>
-                        <p id="team-score-${team.id}" class="text-3xl font-bangers tracking-wider">${team.score}</p>
+                        <p class="text-lg font-semibold" style="color: ${team.color}; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">${team.name}</p>
+                        <p id="team-score-${team.id}" class="text-4xl font-lilita text-slate-600">${team.score}</p>
                     </div>
                 `;
                 teamsControlArea.appendChild(teamControl);
@@ -296,7 +301,7 @@
         function loadNextQuestion() {
             isAnswered = false;
             feedbackText.textContent = '';
-            feedbackText.classList.remove('text-yellow-400', 'text-red-400');
+            feedbackText.classList.remove('text-yellow-300', 'text-red-400');
             nextBtn.classList.add('hidden');
             revealBtn.classList.remove('hidden');
             revealBtn.disabled = false;
@@ -348,7 +353,7 @@
                 if (firstCorrectTeam) {
                     firstCorrectTeam.score++; // Bonus point
                     feedbackText.textContent = `${firstCorrectTeam.name} was first and correct! +2 points!`;
-                    feedbackText.classList.add('text-yellow-400');
+                    feedbackText.classList.add('text-yellow-300');
                 }
             } else {
                  feedbackText.textContent = "Nobody got it right!";
@@ -358,8 +363,8 @@
             if (correctAnswer === 'left' || correctAnswer === 'neither') choiceLeft.classList.add('correct'); else choiceLeft.classList.add('incorrect');
             if (correctAnswer === 'right' || correctAnswer === 'neither') choiceRight.classList.add('correct'); else choiceRight.classList.add('incorrect');
             
-            valueLeft.innerHTML += `<br><span class="text-base font-sans text-gray-300">(${formatBaseValue(leftTotalValue, leftItem.baseUnit)})</span>`;
-            valueRight.innerHTML += `<br><span class="text-base font-sans text-gray-300">(${formatBaseValue(rightTotalValue, rightItem.baseUnit)})</span>`;
+            valueLeft.innerHTML += `<br><span class="text-base font-sans text-slate-600">(${formatBaseValue(leftTotalValue, leftItem.baseUnit)})</span>`;
+            valueRight.innerHTML += `<br><span class="text-base font-sans text-slate-600">(${formatBaseValue(rightTotalValue, rightItem.baseUnit)})</span>`;
 
             updateScores();
             nextBtn.classList.remove('hidden');
