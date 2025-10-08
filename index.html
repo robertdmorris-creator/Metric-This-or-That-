@@ -161,7 +161,23 @@
         // --- Game State ---
         let teams = [];
         let isAnswered = false;
-        const prefixes = [ { symbol: 'k', factor: 1000 }, { symbol: 'h', factor: 100 }, { symbol: '', factor: 1 }, { symbol: 'd', factor: 0.1 }, { symbol: 'c', factor: 0.01 }, { symbol: 'm', factor: 0.001 } ];
+        const unitPrefixes = {
+            g: [ // Weight
+                { symbol: 'kg', factor: 1000 },
+                { symbol: 'g', factor: 1 },
+                { symbol: 'mg', factor: 0.001 }
+            ],
+            m: [ // Length
+                { symbol: 'km', factor: 1000 },
+                { symbol: 'm', factor: 1 },
+                { symbol: 'cm', factor: 0.01 },
+                { symbol: 'mm', factor: 0.001 }
+            ],
+            L: [ // Volume
+                { symbol: 'L', factor: 1 },
+                { symbol: 'mL', factor: 0.001 }
+            ]
+        };
         const items = {
             g: [ { name: 'A bowling ball', emoji: '🎳' }, { name: 'An apple', emoji: '🍎' }, { name: 'A large car', emoji: '🚗' }, { name: 'A feather', emoji: '🪶' }, { name: 'A house cat', emoji: '🐈' } ],
             m: [ { name: 'A giant redwood', emoji: '🌲' }, { name: 'A pencil', emoji: '✏️' }, { name: 'A blue whale', emoji: '🐋' }, { name: 'A doorway', emoji: '🚪' }, { name: 'An ant', emoji: '🐜' } ],
@@ -270,6 +286,7 @@
         function generateQuestion() {
             const category = Object.keys(items)[Math.floor(Math.random() * Object.keys(items).length)];
             const baseUnit = category;
+            const availablePrefixes = unitPrefixes[baseUnit];
             
             let item1Index, item2Index;
             do { item1Index = Math.floor(Math.random() * items[category].length); } while (!items[category][item1Index]);
@@ -279,11 +296,11 @@
             const item2 = items[category][item2Index];
 
             let prefix1Index, prefix2Index;
-            do { prefix1Index = Math.floor(Math.random() * prefixes.length); } while (!prefixes[prefix1Index]);
-            do { prefix2Index = Math.floor(Math.random() * prefixes.length); } while (prefix1Index === prefix2Index || !prefixes[prefix2Index]);
+            do { prefix1Index = Math.floor(Math.random() * availablePrefixes.length); } while (!availablePrefixes[prefix1Index]);
+            do { prefix2Index = Math.floor(Math.random() * availablePrefixes.length); } while (prefix1Index === prefix2Index || !availablePrefixes[prefix2Index]);
 
-            const prefix1 = prefixes[prefix1Index];
-            const prefix2 = prefixes[prefix2Index];
+            const prefix1 = availablePrefixes[prefix1Index];
+            const prefix2 = availablePrefixes[prefix2Index];
             
             const baseValue1 = (Math.random() * 20 + 1) * Math.pow(10, Math.floor(Math.random() * 2));
             const baseValue2 = baseValue1 * (Math.random() * 1.5 + 1.5);
@@ -311,8 +328,8 @@
             
             generateQuestion();
 
-            valueLeft.innerHTML = `${leftItem.displayValue.toLocaleString()} ${leftItem.prefix.symbol}${leftItem.baseUnit}`;
-            valueRight.innerHTML = `${rightItem.displayValue.toLocaleString()} ${rightItem.prefix.symbol}${rightItem.baseUnit}`;
+            valueLeft.innerHTML = `${leftItem.displayValue.toLocaleString()} ${leftItem.prefix.symbol}`;
+            valueRight.innerHTML = `${rightItem.displayValue.toLocaleString()} ${rightItem.prefix.symbol}`;
             emojiLeft.textContent = leftItem.emoji;
             descLeft.textContent = leftItem.name;
             emojiRight.textContent = rightItem.emoji;
