@@ -13,7 +13,6 @@
             font-family: 'Poppins', sans-serif;
             background-color: #1a202c;
             color: #e2e8f0;
-            touch-action: none; /* Prevents scrolling on touch devices */
         }
         .font-bangers {
             font-family: 'Bangers', cursive;
@@ -44,7 +43,6 @@
             transition: all 0.2s ease;
             border: 4px solid white;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            user-select: none; /* Prevent text selection */
         }
         .team-token-disc:active { cursor: grabbing; transform: scale(1.1); z-index: 50; }
         .team-token-disc.placed {
@@ -77,18 +75,16 @@
         .btn-yellow { background-color: #f6e05e; color: #1a202c; }
         .btn-yellow:hover { background-color: #f59e0b; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .dragging-clone {
-            position: absolute;
-            pointer-events: none;
-            z-index: 1000;
-            opacity: 0.8;
-        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-5xl mx-auto text-center">
+    <div class="w-full max-w-5xl mx-auto text-center relative">
+        <button id="fullscreen-btn" class="absolute top-2 right-2 z-50 p-2 rounded-full bg-gray-600 hover:bg-gray-500 text-white" title="Toggle Fullscreen">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+        </button>
         <!-- Setup Section -->
         <div id="setup-section" class="card p-8 mb-8">
             <h1 class="text-5xl font-bangers text-yellow-400 tracking-wider">Metric Match-up</h1>
@@ -158,6 +154,7 @@
         const feedbackText = document.getElementById('feedback-text');
         const revealBtn = document.getElementById('reveal-btn');
         const nextBtn = document.getElementById('next-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
 
         // --- Game State ---
         let teams = [];
@@ -171,7 +168,6 @@
         let leftItem = {};
         let rightItem = {};
         let draggedItem = null;
-        let touchClone = null; // For touch dragging
 
         // --- Setup Logic ---
         const defaultColors = ['#f6ad55', '#4fd1c5', '#f687b3', '#68d391'];
@@ -222,10 +218,16 @@
 
         function formatBaseValue(value, baseUnit) {
             const formatPrefixes = [
-                { symbol: 'G', factor: 1e9 }, { symbol: 'M', factor: 1e6 }, { symbol: 'k', factor: 1e3 },
-                { symbol: '', factor: 1 }, { symbol: 'm', factor: 1e-3 }, { symbol: 'μ', factor: 1e-6 },
+                { symbol: 'G', factor: 1e9 },
+                { symbol: 'M', factor: 1e6 },
+                { symbol: 'k', factor: 1e3 },
+                { symbol: '', factor: 1 },
+                { symbol: 'm', factor: 1e-3 },
+                { symbol: 'μ', factor: 1e-6 },
             ];
+
             if (value === 0) return `0 ${baseUnit}`;
+
             for (const p of formatPrefixes) {
                 if (Math.abs(value) >= p.factor) {
                     const displayVal = value / p.factor;
@@ -233,6 +235,8 @@
                     return `${formattedVal.toLocaleString()} ${p.symbol}${baseUnit}`;
                 }
             }
+            
+            // Handle values smaller than the smallest prefix in the main list
             const smallestPrefix = formatPrefixes[formatPrefixes.length - 1];
             const displayVal = value / smallestPrefix.factor;
             const formattedVal = parseFloat(displayVal.toPrecision(3));
@@ -261,22 +265,30 @@
         function generateQuestion() {
             const category = Object.keys(items)[Math.floor(Math.random() * Object.keys(items).length)];
             const baseUnit = category;
+            
             let item1Index, item2Index;
             do { item1Index = Math.floor(Math.random() * items[category].length); } while (!items[category][item1Index]);
             do { item2Index = Math.floor(Math.random() * items[category].length); } while (item1Index === item2Index || !items[category][item2Index]);
+            
             const item1 = items[category][item1Index];
             const item2 = items[category][item2Index];
+
             let prefix1Index, prefix2Index;
             do { prefix1Index = Math.floor(Math.random() * prefixes.length); } while (!prefixes[prefix1Index]);
             do { prefix2Index = Math.floor(Math.random() * prefixes.length); } while (prefix1Index === prefix2Index || !prefixes[prefix2Index]);
+
             const prefix1 = prefixes[prefix1Index];
             const prefix2 = prefixes[prefix2Index];
+            
             const baseValue1 = (Math.random() * 20 + 1) * Math.pow(10, Math.floor(Math.random() * 2));
             const baseValue2 = baseValue1 * (Math.random() * 1.5 + 1.5);
+
             let val1 = baseValue1, val2 = baseValue2;
             if (Math.random() > 0.5) [val1, val2] = [val2, val1];
+            
             leftItem = { ...item1, value: val1, prefix: prefix1, baseUnit };
             rightItem = { ...item2, value: val2, prefix: prefix2, baseUnit };
+            
             leftItem.displayValue = parseFloat((leftItem.value / leftItem.prefix.factor).toPrecision(3));
             rightItem.displayValue = parseFloat((rightItem.value / rightItem.prefix.factor).toPrecision(3));
         }
@@ -288,15 +300,19 @@
             nextBtn.classList.add('hidden');
             revealBtn.classList.remove('hidden');
             revealBtn.disabled = false;
+            
             teams.forEach(t => { t.choice = null; t.choiceTimestamp = null; });
             [choiceLeft, choiceRight].forEach(c => c.classList.remove('correct', 'incorrect'));
+            
             generateQuestion();
+
             valueLeft.innerHTML = `${leftItem.displayValue.toLocaleString()} ${leftItem.prefix.symbol}${leftItem.baseUnit}`;
             valueRight.innerHTML = `${rightItem.displayValue.toLocaleString()} ${rightItem.prefix.symbol}${rightItem.baseUnit}`;
             emojiLeft.textContent = leftItem.emoji;
             descLeft.textContent = leftItem.name;
             emojiRight.textContent = rightItem.emoji;
             descRight.textContent = rightItem.name;
+            
             teams.forEach(team => {
                 const token = document.getElementById(`team-token-${team.id}`);
                 const startZone = document.getElementById(`token-start-zone-${team.id}`);
@@ -312,17 +328,23 @@
             if (isAnswered) return;
             isAnswered = true;
             revealBtn.disabled = true;
+
             document.querySelectorAll('.team-token-disc').forEach(t => t.draggable = false);
+
             const leftTotalValue = leftItem.value;
             const rightTotalValue = rightItem.value;
             let correctAnswer = leftTotalValue > rightTotalValue ? 'left' : 'right';
             if (leftTotalValue === rightTotalValue) correctAnswer = 'neither';
+            
             const correctTeams = teams.filter(team => team.choice === correctAnswer || (correctAnswer === 'neither' && team.choice !== null));
             let firstCorrectTeam = null;
+
             if (correctTeams.length > 0) {
                 correctTeams.sort((a, b) => a.choiceTimestamp - b.choiceTimestamp);
                 firstCorrectTeam = correctTeams[0];
+                
                 correctTeams.forEach(team => team.score++);
+                
                 if (firstCorrectTeam) {
                     firstCorrectTeam.score++; // Bonus point
                     feedbackText.textContent = `${firstCorrectTeam.name} was first and correct! +2 points!`;
@@ -332,10 +354,13 @@
                  feedbackText.textContent = "Nobody got it right!";
                  feedbackText.classList.add('text-red-400');
             }
+            
             if (correctAnswer === 'left' || correctAnswer === 'neither') choiceLeft.classList.add('correct'); else choiceLeft.classList.add('incorrect');
             if (correctAnswer === 'right' || correctAnswer === 'neither') choiceRight.classList.add('correct'); else choiceRight.classList.add('incorrect');
+            
             valueLeft.innerHTML += `<br><span class="text-base font-sans text-gray-300">(${formatBaseValue(leftTotalValue, leftItem.baseUnit)})</span>`;
             valueRight.innerHTML += `<br><span class="text-base font-sans text-gray-300">(${formatBaseValue(rightTotalValue, rightItem.baseUnit)})</span>`;
+
             updateScores();
             nextBtn.classList.remove('hidden');
             revealBtn.classList.add('hidden');
@@ -347,107 +372,71 @@
             });
         }
         
-        function handleDrop(dropTarget, droppedItem) {
-            if (!droppedItem) return;
-            if (dropTarget.classList.contains('team-token-disc')) return;
-            
-            if (dropTarget.classList.contains('choice-card') || dropTarget.classList.contains('token-start-zone')) {
-                if (dropTarget.classList.contains('token-start-zone') && dropTarget.children.length > 0) return;
-                
-                const tokenDropArea = dropTarget.classList.contains('choice-card') ? dropTarget.querySelector('.w-full') : dropTarget;
-                tokenDropArea.appendChild(droppedItem);
-                
-                const teamId = parseInt(droppedItem.id.split('-')[2]);
-                const team = teams.find(t => t.id === teamId);
-
-                if (team.choiceTimestamp === null) team.choiceTimestamp = Date.now();
-                
-                if (dropTarget.id === 'choice-left') {
-                    team.choice = 'left';
-                    droppedItem.classList.add('placed');
-                } else if (dropTarget.id === 'choice-right') {
-                    team.choice = 'right';
-                    droppedItem.classList.add('placed');
-                } else { 
-                    team.choice = null; 
-                    team.choiceTimestamp = null; 
-                    droppedItem.classList.remove('placed');
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
                 }
             }
         }
 
         function addDragDropListeners() {
-            // Mouse Drag Events
             document.body.addEventListener('dragstart', (e) => {
                 if (e.target.classList.contains('team-token-disc')) {
                     draggedItem = e.target;
                     setTimeout(() => { e.target.style.opacity = '0.5'; }, 0);
                 }
             });
-            document.body.addEventListener('dragend', () => {
+            document.body.addEventListener('dragend', (e) => {
                 if (draggedItem) {
                     draggedItem.style.opacity = '1';
                     draggedItem = null;
                 }
             });
 
-            // Touch Events
-            document.body.addEventListener('touchstart', (e) => {
-                if (e.target.classList.contains('team-token-disc')) {
-                    draggedItem = e.target;
-                    draggedItem.style.opacity = '0.5';
-                    
-                    touchClone = draggedItem.cloneNode(true);
-                    touchClone.classList.add('dragging-clone');
-                    document.body.appendChild(touchClone);
-                    
-                    const touch = e.targetTouches[0];
-                    touchClone.style.left = `${touch.clientX - touchClone.offsetWidth / 2}px`;
-                    touchClone.style.top = `${touch.clientY - touchClone.offsetHeight / 2}px`;
-                }
-            }, { passive: false });
-
-            document.body.addEventListener('touchmove', (e) => {
-                if (draggedItem && touchClone) {
-                    e.preventDefault();
-                    const touch = e.targetTouches[0];
-                    touchClone.style.left = `${touch.clientX - touchClone.offsetWidth / 2}px`;
-                    touchClone.style.top = `${touch.clientY - touchClone.offsetHeight / 2}px`;
-                }
-            }, { passive: false });
-
-            document.body.addEventListener('touchend', (e) => {
-                if (draggedItem && touchClone) {
-                    touchClone.style.display = 'none';
-                    const touch = e.changedTouches[0];
-                    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-                    
-                    const finalDropZone = dropTarget.closest('.choice-card, .token-start-zone');
-                    if(finalDropZone) {
-                        handleDrop(finalDropZone, draggedItem);
-                    }
-
-                    draggedItem.style.opacity = '1';
-                    draggedItem = null;
-                    document.body.removeChild(touchClone);
-                    touchClone = null;
-                }
-            });
-
             const dropZones = [choiceLeft, choiceRight, ...document.querySelectorAll('.token-start-zone')];
             dropZones.forEach(zone => {
-                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('dragover', e => { e.preventDefault(); });
                 zone.addEventListener('dragenter', e => {
                     e.preventDefault();
                     if(e.currentTarget.classList.contains('card')) e.currentTarget.classList.add('drop-zone-active');
                 });
-                zone.addEventListener('dragleave', () => {
-                     zone.classList.remove('drop-zone-active');
+                zone.addEventListener('dragleave', e => {
+                     if(e.currentTarget.classList.contains('card')) e.currentTarget.classList.remove('drop-zone-active');
                 });
                 zone.addEventListener('drop', e => {
                     e.preventDefault();
-                    zone.classList.remove('drop-zone-active');
-                    handleDrop(e.currentTarget, draggedItem);
+                    const dropTarget = e.currentTarget;
+                    if (!draggedItem) return;
+
+                    if(dropTarget.classList.contains('card')) dropTarget.classList.remove('drop-zone-active');
+                    if (dropTarget.classList.contains('team-token-disc')) return;
+                    
+                    if (dropTarget.classList.contains('choice-card') || dropTarget.classList.contains('token-start-zone')) {
+                        if (dropTarget.classList.contains('token-start-zone') && dropTarget.children.length > 0) return;
+                        
+                        const tokenDropArea = dropTarget.classList.contains('choice-card') ? dropTarget.querySelector('.w-full') : dropTarget;
+                        tokenDropArea.appendChild(draggedItem);
+                        
+                        const teamId = parseInt(draggedItem.id.split('-')[2]);
+                        const team = teams.find(t => t.id === teamId);
+
+                        if (team.choiceTimestamp === null) team.choiceTimestamp = Date.now();
+                        
+                        if (dropTarget.id === 'choice-left') {
+                            team.choice = 'left';
+                            draggedItem.classList.add('placed');
+                        } else if (dropTarget.id === 'choice-right') {
+                            team.choice = 'right';
+                            draggedItem.classList.add('placed');
+                        } else { 
+                            team.choice = null; 
+                            team.choiceTimestamp = null; 
+                            draggedItem.classList.remove('placed');
+                        }
+                    }
                 });
             });
         }
@@ -455,6 +444,7 @@
         // --- Event Listeners ---
         revealBtn.addEventListener('click', checkAnswers);
         nextBtn.addEventListener('click', loadNextQuestion);
+        fullscreenBtn.addEventListener('click', toggleFullScreen);
     </script>
 </body>
 </html>
