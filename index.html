@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>This or That: Metric Match-up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +34,11 @@
             justify-content: center;
             min-height: 220px;
             padding: 1.5rem;
+        }
+        @media (min-width: 1024px) {
+            .choice-card {
+                min-height: 300px;
+            }
         }
         .choice-card.correct { border-color: #34d399; background-color: rgba(236, 252, 241, 0.95); }
         .choice-card.incorrect { border-color: #fb7185; background-color: rgba(255, 237, 240, 0.95); }
@@ -102,59 +107,59 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4 lg:p-8">
 
     <div class="emoji-bg" id="emoji-background"></div>
 
-    <div class="w-full max-w-5xl mx-auto text-center relative z-10">
+    <div class="w-full max-w-5xl lg:max-w-7xl mx-auto text-center relative z-10">
         <button id="fullscreen-btn" class="absolute top-2 right-2 z-50 p-2 rounded-full bg-white/30 hover:bg-white/50 text-slate-700" title="Toggle Fullscreen">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
             </svg>
         </button>
         <!-- Setup Section -->
-        <div id="setup-section" class="card p-8 mb-8">
-            <h1 class="text-6xl font-lilita text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500 tracking-wider">Metric Match-up</h1>
-            <h2 class="text-xl mt-2 mb-6 text-slate-500">Team Showdown!</h2>
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">How many teams are playing?</h3>
+        <div id="setup-section" class="card p-8 lg:p-12 mb-8">
+            <h1 class="text-6xl lg:text-8xl font-lilita text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500 tracking-wider">Metric Match-up</h1>
+            <h2 class="text-xl lg:text-2xl mt-2 mb-6 text-slate-500">Team Showdown!</h2>
+            <h3 class="text-lg lg:text-xl font-semibold mb-4 text-gray-700">How many teams are playing?</h3>
             <div id="team-count-selector" class="flex justify-center space-x-4 mb-6">
-                <button data-count="2" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">2</button>
-                <button data-count="3" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">3</button>
-                <button data-count="4" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">4</button>
+                <button data-count="2" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 lg:w-20 lg:h-20 text-3xl rounded-full">2</button>
+                <button data-count="3" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 lg:w-20 lg:h-20 text-3xl rounded-full">3</button>
+                <button data-count="4" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 lg:w-20 lg:h-20 text-3xl rounded-full">4</button>
             </div>
-            <div id="team-config-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"></div>
-            <button id="start-game-btn" class="btn btn-primary text-xl hidden w-full md:w-auto">Start Game</button>
+            <div id="team-config-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6"></div>
+            <button id="start-game-btn" class="btn btn-primary text-xl lg:text-2xl hidden w-full md:w-auto">Start Game</button>
         </div>
 
         <!-- Game Section -->
         <div id="game-section" class="hidden">
             <div class="flex justify-between items-center mb-4 px-2">
-                 <h1 class="text-5xl font-lilita text-white tracking-wider" id="question-title">Which is MORE?</h1>
+                 <h1 class="text-5xl lg:text-6xl font-lilita text-white tracking-wider" id="question-title">Which is MORE?</h1>
                 <div>
-                    <button id="reveal-btn" class="btn btn-yellow text-lg">Reveal Answer</button>
-                    <button id="next-btn" class="btn btn-green text-lg hidden">Next Question</button>
+                    <button id="reveal-btn" class="btn btn-yellow text-lg lg:text-xl lg:px-8">Reveal Answer</button>
+                    <button id="next-btn" class="btn btn-green text-lg lg:text-xl lg:px-8 hidden">Next Question</button>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
                 <div id="choice-left" class="card choice-card">
                     <div class="flex-grow flex flex-col items-center justify-center">
-                        <p class="text-5xl font-lilita text-indigo-600" id="value-left"></p>
+                        <p class="text-5xl lg:text-7xl font-lilita text-indigo-600" id="value-left"></p>
                     </div>
                     <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
                 <div id="choice-right" class="card choice-card">
                      <div class="flex-grow flex flex-col items-center justify-center">
-                        <p class="text-5xl font-lilita text-indigo-600" id="value-right"></p>
+                        <p class="text-5xl lg:text-7xl font-lilita text-indigo-600" id="value-right"></p>
                     </div>
                     <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
             </div>
 
-            <div id="teams-control-area" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div id="teams-control-area" class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
                 <!-- Team controls are generated here -->
             </div>
-            <p id="feedback-text" class="text-2xl font-bold mt-4 h-8 text-white"></p>
+            <p id="feedback-text" class="text-2xl lg:text-3xl font-bold mt-4 h-8 text-white"></p>
         </div>
     </div>
 
@@ -323,14 +328,14 @@
             teams.forEach(team => {
                 const teamControl = document.createElement('div');
                 teamControl.id = `team-control-${team.id}`;
-                teamControl.className = 'card p-4 flex flex-col items-center justify-between space-y-3';
+                teamControl.className = 'card p-4 lg:p-6 flex flex-col items-center justify-between space-y-3';
                 teamControl.innerHTML = `
                     <div id="token-start-zone-${team.id}" class="token-start-zone">
                          <div id="team-token-${team.id}" class="team-token-disc" draggable="true" style="background-color: ${team.color};"></div>
                     </div>
                     <div class="text-center">
-                        <p class="text-lg font-semibold" style="color: ${team.color}; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">${team.name}</p>
-                        <p id="team-score-${team.id}" class="text-4xl font-lilita text-slate-600">${team.score}</p>
+                        <p class="text-lg lg:text-xl font-semibold" style="color: ${team.color}; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">${team.name}</p>
+                        <p id="team-score-${team.id}" class="text-4xl lg:text-5xl font-lilita text-slate-600">${team.score}</p>
                     </div>
                 `;
                 teamsControlArea.appendChild(teamControl);
@@ -427,8 +432,8 @@
             if (correctAnswer === 'left' || correctAnswer === 'neither') choiceLeft.classList.add('correct'); else choiceLeft.classList.add('incorrect');
             if (correctAnswer === 'right' || correctAnswer === 'neither') choiceRight.classList.add('correct'); else choiceRight.classList.add('incorrect');
             
-            valueLeft.innerHTML += `<br><span class="text-base font-sans text-slate-600">(${formatBaseValue(leftTotalValue, leftItem.baseUnit)})</span>`;
-            valueRight.innerHTML += `<br><span class="text-base font-sans text-slate-600">(${formatBaseValue(rightTotalValue, rightItem.baseUnit)})</span>`;
+            valueLeft.innerHTML += `<br><span class="text-base lg:text-xl font-sans text-slate-600">(${formatBaseValue(leftTotalValue, leftItem.baseUnit)})</span>`;
+            valueRight.innerHTML += `<br><span class="text-base lg:text-xl font-sans text-slate-600">(${formatBaseValue(rightTotalValue, rightItem.baseUnit)})</span>`;
 
             updateScores();
             nextBtn.classList.remove('hidden');
