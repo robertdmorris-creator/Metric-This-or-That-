@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>This or That: All-in-One Drag & Drop</title>
+    <title>This or That: Metric Match-up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&family=Lilita+One&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            background-image: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
+            background-color: #1a202c;
+            background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
             color: #4a5568;
+            overflow: hidden;
         }
         .font-lilita {
             font-family: 'Lilita One', cursive;
         }
         .card {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 1.5rem;
             border: 4px solid white;
@@ -29,13 +31,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            min-height: 280px;
+            justify-content: center;
+            min-height: 220px;
             padding: 1.5rem;
         }
-        .choice-card.correct { border-color: #34d399; background-color: rgba(167, 243, 208, 0.9); }
-        .choice-card.incorrect { border-color: #fb7185; background-color: rgba(254, 205, 211, 0.9); }
-        .choice-card.drop-zone-active { border-color: #facc15; transform: scale(1.02); }
+        .choice-card.correct { border-color: #34d399; background-color: rgba(236, 252, 241, 0.95); }
+        .choice-card.incorrect { border-color: #fb7185; background-color: rgba(255, 237, 240, 0.95); }
+        .choice-card.drop-zone-active { border-color: #f59e0b; transform: scale(1.02); }
         .team-token-disc {
             width: 60px;
             height: 60px;
@@ -54,7 +56,7 @@
         .token-start-zone {
             min-height: 70px;
             width: 100%;
-            border: 2px dashed #94a3b8;
+            border: 2px dashed #a0aec0;
             border-radius: 1rem;
             display: flex;
             align-items: center;
@@ -64,24 +66,47 @@
         .btn {
             border-radius: 0.75rem;
             font-weight: 700;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border: 2px solid transparent;
         }
-        .btn-primary { background-color: #ec4899; color: white; }
-        .btn-primary:hover { background-color: #d946ef; }
-        .btn-green { background-color: #22c55e; color: white; }
-        .btn-green:hover { background-color: #16a34a; }
+        .btn-primary { background-color: #fb7185; color: white; }
+        .btn-primary:hover { background-color: #f43f5e; }
+        .btn-green { background-color: #34d399; color: white; }
+        .btn-green:hover { background-color: #10b981; }
         .btn-yellow { background-color: #f59e0b; color: white; }
-        .btn-yellow:hover { background-color: #d97706; }
+        .btn-yellow:hover { background-color: #ea580c; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .emoji-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .emoji-bg span {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 20s infinite linear;
+            opacity: 0.5;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-10vh) rotate(360deg); }
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-5xl mx-auto text-center relative">
+    <div class="emoji-bg" id="emoji-background"></div>
+
+    <div class="w-full max-w-5xl mx-auto text-center relative z-10">
         <button id="fullscreen-btn" class="absolute top-2 right-2 z-50 p-2 rounded-full bg-white/30 hover:bg-white/50 text-slate-700" title="Toggle Fullscreen">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -89,9 +114,9 @@
         </button>
         <!-- Setup Section -->
         <div id="setup-section" class="card p-8 mb-8">
-            <h1 class="text-6xl font-lilita text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 tracking-wider">Metric Match-up</h1>
+            <h1 class="text-6xl font-lilita text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500 tracking-wider">Metric Match-up</h1>
             <h2 class="text-xl mt-2 mb-6 text-slate-500">Team Showdown!</h2>
-            <h3 class="text-lg font-semibold mb-4">How many teams are playing?</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">How many teams are playing?</h3>
             <div id="team-count-selector" class="flex justify-center space-x-4 mb-6">
                 <button data-count="2" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">2</button>
                 <button data-count="3" class="btn bg-slate-200 hover:bg-slate-300 text-slate-700 w-16 h-16 text-3xl rounded-full">3</button>
@@ -114,17 +139,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div id="choice-left" class="card choice-card">
                     <div class="flex-grow flex flex-col items-center justify-center">
-                        <span class="text-8xl" id="emoji-left"></span>
-                        <p class="text-2xl mt-4" id="desc-left"></p>
-                        <p class="text-5xl font-lilita text-violet-600 mt-2" id="value-left"></p>
+                        <p class="text-5xl font-lilita text-indigo-600" id="value-left"></p>
                     </div>
                     <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
                 <div id="choice-right" class="card choice-card">
                      <div class="flex-grow flex flex-col items-center justify-center">
-                        <span class="text-8xl" id="emoji-right"></span>
-                        <p class="text-2xl mt-4" id="desc-right"></p>
-                        <p class="text-5xl font-lilita text-violet-600 mt-2" id="value-right"></p>
+                        <p class="text-5xl font-lilita text-indigo-600" id="value-right"></p>
                     </div>
                     <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
@@ -147,41 +168,58 @@
         const choiceLeft = document.getElementById('choice-left');
         const choiceRight = document.getElementById('choice-right');
         const teamsControlArea = document.getElementById('teams-control-area');
-        const emojiLeft = document.getElementById('emoji-left');
-        const emojiRight = document.getElementById('emoji-right');
-        const descLeft = document.getElementById('desc-left');
-        const descRight = document.getElementById('desc-right');
         const valueLeft = document.getElementById('value-left');
         const valueRight = document.getElementById('value-right');
         const feedbackText = document.getElementById('feedback-text');
         const revealBtn = document.getElementById('reveal-btn');
         const nextBtn = document.getElementById('next-btn');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const emojiBackground = document.getElementById('emoji-background');
 
         // --- Game State ---
         let teams = [];
         let isAnswered = false;
         const unitPrefixes = {
-            g: [ // Weight
+            g: [ // Mass (base unit: gram)
                 { symbol: 'kg', factor: 1000 },
                 { symbol: 'g', factor: 1 },
                 { symbol: 'mg', factor: 0.001 }
             ],
-            m: [ // Length
+            m: [ // Length (base unit: meter)
                 { symbol: 'km', factor: 1000 },
                 { symbol: 'm', factor: 1 },
                 { symbol: 'cm', factor: 0.01 },
                 { symbol: 'mm', factor: 0.001 }
             ],
-            L: [ // Volume
+            L: [ // Volume (base unit: liter)
+                { symbol: 'kL', factor: 1000 },
                 { symbol: 'L', factor: 1 },
                 { symbol: 'mL', factor: 0.001 }
             ]
         };
+        
         const items = {
-            g: [ { name: 'A bowling ball', emoji: '🎳' }, { name: 'An apple', emoji: '🍎' }, { name: 'A large car', emoji: '🚗' }, { name: 'A feather', emoji: '🪶' }, { name: 'A house cat', emoji: '🐈' } ],
-            m: [ { name: 'A giant redwood', emoji: '🌲' }, { name: 'A pencil', emoji: '✏️' }, { name: 'A blue whale', emoji: '🐋' }, { name: 'A doorway', emoji: '🚪' }, { name: 'An ant', emoji: '🐜' } ],
-            L: [ { name: 'A fish tank', emoji: '🐠' }, { name: 'A carton of milk', emoji: '🥛' }, { name: 'A swimming pool', emoji: '🏊' }, { name: 'A can of soda', emoji: '🥤' }, { name: 'A teaspoon', emoji: '🥄' } ]
+            g: [ // in grams
+                { name: 'Weight of a bowling ball', baseValue: 5443 },
+                { name: 'Weight of an apple', baseValue: 182 },
+                { name: 'Weight of a laptop', baseValue: 2000 },
+                { name: 'Weight of a slice of bread', baseValue: 25 },
+                { name: 'Weight of a house cat', baseValue: 4500 }
+            ],
+            m: [ // in meters
+                { name: 'Height of a giant redwood', baseValue: 91 },
+                { name: 'Length of a pencil', baseValue: 0.19 },
+                { name: 'Length of a blue whale', baseValue: 29 },
+                { name: 'Height of a doorway', baseValue: 2.03 },
+                { name: 'Length of an ant', baseValue: 0.005 }
+            ],
+            L: [ // in liters
+                { name: 'Volume of a 10-gallon fish tank', baseValue: 37.85 },
+                { name: 'Volume of a water bottle', baseValue: 0.5 },
+                { name: 'Volume of a bathtub', baseValue: 150 },
+                { name: 'Volume of a soda can', baseValue: 0.355 },
+                { name: 'Volume of a teaspoon', baseValue: 0.005 }
+            ]
         };
         let leftItem = {};
         let rightItem = {};
@@ -195,10 +233,10 @@
                 const count = parseInt(e.target.dataset.count);
                 createTeamConfigs(count);
                 document.querySelectorAll('#team-count-selector button').forEach(btn => {
-                    btn.classList.remove('bg-violet-500', 'text-white');
+                    btn.classList.remove('bg-indigo-500', 'text-white');
                     btn.classList.add('bg-slate-200', 'text-slate-700');
                 });
-                e.target.classList.add('bg-violet-500', 'text-white');
+                e.target.classList.add('bg-indigo-500', 'text-white');
                 e.target.classList.remove('bg-slate-200', 'text-slate-700');
             }
         });
@@ -230,6 +268,22 @@
             gameSection.classList.remove('hidden');
             initializeGame();
         });
+        
+        // --- Emoji Background ---
+        function createFloatingEmojis() {
+            const emojis = ['⚖️', '📏', '💧', 'g', 'm', 'L', '🤔', '💡', '🏆'];
+            for (let i = 0; i < 20; i++) {
+                const emoji = document.createElement('span');
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emoji.style.left = `${Math.random() * 100}vw`;
+                emoji.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                emoji.style.animationDelay = `${Math.random() * 10}s`;
+                emoji.style.fontSize = `${Math.random() * 1.5 + 1}rem`;
+                emojiBackground.appendChild(emoji);
+            }
+        }
+        createFloatingEmojis();
+
 
         // --- Game Logic ---
         function initializeGame() {
@@ -302,14 +356,11 @@
             const prefix1 = availablePrefixes[prefix1Index];
             const prefix2 = availablePrefixes[prefix2Index];
             
-            const baseValue1 = (Math.random() * 20 + 1) * Math.pow(10, Math.floor(Math.random() * 2));
-            const baseValue2 = baseValue1 * (Math.random() * 1.5 + 1.5);
-
-            let val1 = baseValue1, val2 = baseValue2;
-            if (Math.random() > 0.5) [val1, val2] = [val2, val1];
+            const val1 = item1.baseValue;
+            const val2 = item2.baseValue;
             
-            leftItem = { ...item1, value: val1, prefix: prefix1, baseUnit };
-            rightItem = { ...item2, value: val2, prefix: prefix2, baseUnit };
+            leftItem = { name: item1.name, value: val1, prefix: prefix1, baseUnit };
+            rightItem = { name: item2.name, value: val2, prefix: prefix2, baseUnit };
             
             leftItem.displayValue = parseFloat((leftItem.value / leftItem.prefix.factor).toPrecision(3));
             rightItem.displayValue = parseFloat((rightItem.value / rightItem.prefix.factor).toPrecision(3));
@@ -330,10 +381,6 @@
 
             valueLeft.innerHTML = `${leftItem.displayValue.toLocaleString()} ${leftItem.prefix.symbol}`;
             valueRight.innerHTML = `${rightItem.displayValue.toLocaleString()} ${rightItem.prefix.symbol}`;
-            emojiLeft.textContent = leftItem.emoji;
-            descLeft.textContent = leftItem.name;
-            emojiRight.textContent = rightItem.emoji;
-            descRight.textContent = rightItem.name;
             
             teams.forEach(team => {
                 const token = document.getElementById(`team-token-${team.id}`);
