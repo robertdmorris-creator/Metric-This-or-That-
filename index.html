@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>This or That: Metric Match-up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +15,11 @@
             background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
             color: #4a5568;
             overflow: hidden;
+            /* Prevent text selection during drag on mobile */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         .font-lilita {
             font-family: 'Lilita One', cursive;
@@ -51,6 +56,7 @@
             transition: all 0.2s ease;
             border: 4px solid white;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            touch-action: none; /* Prevents scrolling when touching the token */
         }
         .team-token-disc:active { cursor: grabbing; transform: scale(1.1); z-index: 50; }
         .team-token-disc.placed {
@@ -146,13 +152,15 @@
                     <div class="flex-grow flex flex-col items-center justify-center">
                         <p class="text-5xl lg:text-7xl font-lilita text-indigo-600" id="value-left"></p>
                     </div>
-                    <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
+                    <!-- Added a specific class 'token-drop-container' for easier selection -->
+                    <div class="token-drop-container w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
                 <div id="choice-right" class="card choice-card">
                      <div class="flex-grow flex flex-col items-center justify-center">
                         <p class="text-5xl lg:text-7xl font-lilita text-indigo-600" id="value-right"></p>
                     </div>
-                    <div class="w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
+                    <!-- Added a specific class 'token-drop-container' for easier selection -->
+                    <div class="token-drop-container w-full min-h-[40px] mt-2 flex justify-center items-center flex-wrap gap-2"></div>
                 </div>
             </div>
 
@@ -294,7 +302,7 @@
         function initializeGame() {
             createTeamControls();
             loadNextQuestion();
-            addDragDropListeners();
+            addInteractionListeners();
         }
 
         function formatBaseValue(value, baseUnit) {
@@ -455,65 +463,133 @@
                 }
             }
         }
+        
+        // --- NEW --- Extracted drop logic into its own function for reuse
+        function handleDrop(token, dropTarget) {
+            if (dropTarget.classList.contains('team-token-disc')) return;
+            if (dropTarget.classList.contains('token-start-zone') && dropTarget.children.length > 0 && !dropTarget.contains(token)) return;
 
-        function addDragDropListeners() {
+            const tokenDropArea = dropTarget.classList.contains('choice-card') ? dropTarget.querySelector('.token-drop-container') : dropTarget;
+            if (!tokenDropArea) return;
+
+            tokenDropArea.appendChild(token);
+            
+            const teamId = parseInt(token.id.split('-')[2]);
+            const team = teams.find(t => t.id === teamId);
+            if (!team) return;
+
+            if (team.choiceTimestamp === null) team.choiceTimestamp = Date.now();
+            
+            if (dropTarget.id === 'choice-left') {
+                team.choice = 'left';
+                token.classList.add('placed');
+            } else if (dropTarget.id === 'choice-right') {
+                team.choice = 'right';
+                token.classList.add('placed');
+            } else if (dropTarget.classList.contains('token-start-zone')) { 
+                team.choice = null; 
+                team.choiceTimestamp = null; 
+                token.classList.remove('placed');
+            }
+        }
+
+        // --- REVISED --- Added touch events for mobile compatibility
+        function addInteractionListeners() {
+            // --- MOUSE DRAG & DROP (for desktop) ---
             document.body.addEventListener('dragstart', (e) => {
                 if (e.target.classList.contains('team-token-disc')) {
                     draggedItem = e.target;
                     setTimeout(() => { e.target.style.opacity = '0.5'; }, 0);
                 }
             });
+
             document.body.addEventListener('dragend', (e) => {
                 if (draggedItem) {
                     draggedItem.style.opacity = '1';
-                    draggedItem = null;
                 }
+                draggedItem = null;
+                document.querySelectorAll('.drop-zone-active').forEach(el => el.classList.remove('drop-zone-active'));
             });
 
             const dropZones = [choiceLeft, choiceRight, ...document.querySelectorAll('.token-start-zone')];
             dropZones.forEach(zone => {
-                zone.addEventListener('dragover', e => { e.preventDefault(); });
+                zone.addEventListener('dragover', e => e.preventDefault());
                 zone.addEventListener('dragenter', e => {
                     e.preventDefault();
-                    if(e.currentTarget.classList.contains('card')) e.currentTarget.classList.add('drop-zone-active');
+                    if (e.currentTarget.classList.contains('card')) e.currentTarget.classList.add('drop-zone-active');
                 });
                 zone.addEventListener('dragleave', e => {
-                     if(e.currentTarget.classList.contains('card')) e.currentTarget.classList.remove('drop-zone-active');
+                    if (e.currentTarget.classList.contains('card')) e.currentTarget.classList.remove('drop-zone-active');
                 });
                 zone.addEventListener('drop', e => {
                     e.preventDefault();
-                    const dropTarget = e.currentTarget;
                     if (!draggedItem) return;
-
-                    if(dropTarget.classList.contains('card')) dropTarget.classList.remove('drop-zone-active');
-                    if (dropTarget.classList.contains('team-token-disc')) return;
-                    
-                    if (dropTarget.classList.contains('choice-card') || dropTarget.classList.contains('token-start-zone')) {
-                        if (dropTarget.classList.contains('token-start-zone') && dropTarget.children.length > 0) return;
-                        
-                        const tokenDropArea = dropTarget.classList.contains('choice-card') ? dropTarget.querySelector('.w-full') : dropTarget;
-                        tokenDropArea.appendChild(draggedItem);
-                        
-                        const teamId = parseInt(draggedItem.id.split('-')[2]);
-                        const team = teams.find(t => t.id === teamId);
-
-                        if (team.choiceTimestamp === null) team.choiceTimestamp = Date.now();
-                        
-                        if (dropTarget.id === 'choice-left') {
-                            team.choice = 'left';
-                            draggedItem.classList.add('placed');
-                        } else if (dropTarget.id === 'choice-right') {
-                            team.choice = 'right';
-                            draggedItem.classList.add('placed');
-                        } else { 
-                            team.choice = null; 
-                            team.choiceTimestamp = null; 
-                            draggedItem.classList.remove('placed');
-                        }
-                    }
+                    if (e.currentTarget.classList.contains('card')) e.currentTarget.classList.remove('drop-zone-active');
+                    handleDrop(draggedItem, e.currentTarget);
                 });
             });
+
+            // --- TOUCH DRAG & DROP (for mobile/tablet) ---
+            let touchStartX, touchStartY, originalParent, currentDropZone = null;
+
+            document.body.addEventListener('touchstart', (e) => {
+                if (e.target.classList.contains('team-token-disc')) {
+                    draggedItem = e.target;
+                    originalParent = draggedItem.parentElement;
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = draggedItem.getBoundingClientRect();
+                    touchStartX = touch.clientX - rect.left;
+                    touchStartY = touch.clientY - rect.top;
+                    draggedItem.style.position = 'fixed';
+                    draggedItem.style.zIndex = '1000';
+                    draggedItem.style.opacity = '0.7';
+                    draggedItem.style.left = `${touch.clientX - touchStartX}px`;
+                    draggedItem.style.top = `${touch.clientY - touchStartY}px`;
+                }
+            }, { passive: false });
+
+            document.body.addEventListener('touchmove', (e) => {
+                if (!draggedItem) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                draggedItem.style.left = `${touch.clientX - touchStartX}px`;
+                draggedItem.style.top = `${touch.clientY - touchStartY}px`;
+                draggedItem.style.display = 'none';
+                const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+                draggedItem.style.display = '';
+
+                let potentialDropZone = elementUnder ? elementUnder.closest('.choice-card, .token-start-zone') : null;
+
+                if (currentDropZone && currentDropZone !== potentialDropZone) {
+                    currentDropZone.classList.remove('drop-zone-active');
+                }
+                if (potentialDropZone && potentialDropZone.classList.contains('card')) {
+                    potentialDropZone.classList.add('drop-zone-active');
+                }
+                currentDropZone = potentialDropZone;
+            }, { passive: false });
+
+            document.body.addEventListener('touchend', (e) => {
+                if (!draggedItem) return;
+                draggedItem.style.position = '';
+                draggedItem.style.zIndex = '';
+                draggedItem.style.left = '';
+                draggedItem.style.top = '';
+                draggedItem.style.opacity = '1';
+
+                if (currentDropZone) {
+                    currentDropZone.classList.remove('drop-zone-active');
+                    handleDrop(draggedItem, currentDropZone);
+                } else {
+                    originalParent.appendChild(draggedItem);
+                }
+                draggedItem = null;
+                currentDropZone = null;
+                originalParent = null;
+            });
         }
+
 
         // --- Event Listeners ---
         revealBtn.addEventListener('click', checkAnswers);
@@ -522,4 +598,3 @@
     </script>
 </body>
 </html>
-
